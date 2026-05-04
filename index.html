@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dead Sale Detector — Find Your Sales Leak Free</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#050A18;--surface:#0D1530;--surface2:#111827;
+  --glass:rgba(255,255,255,0.04);--glass2:rgba(255,255,255,0.06);
+  --gold:#C9A84C;--gold-glow:rgba(201,168,76,0.2);--gold-dim:rgba(201,168,76,0.09);--gold-border:rgba(201,168,76,0.35);
+  --blue:#4A9EFF;--blue-dim:rgba(74,158,255,0.1);
+  --green:#22C55E;--green-dim:rgba(34,197,94,0.1);--green-border:rgba(34,197,94,0.4);
+  --white:#FFFFFF;--sub:#6B7E96;--sub2:#3D4F63;
+  --red:#E24B4A;--red-dim:rgba(226,75,74,0.1);
+  --orange:#E07B2A;--orange-dim:rgba(224,123,42,0.1);
+  --yellow:#D4A017;--yellow-dim:rgba(212,160,23,0.1);
+}
+html,body{height:100%;background:var(--navy)}
+body{font-family:'DM Sans',sans-serif;color:var(--white);-webkit-font-smoothing:antialiased}
+
+#app{min-height:100vh;max-width:480px;margin:0 auto;position:relative;overflow-x:hidden}
+
+/* PARTICLES */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.p{position:absolute;border-radius:50%;animation:pfloat linear infinite}
+@keyframes pfloat{0%{transform:translateY(110vh) scale(1)}100%{transform:translateY(-10vh) scale(0.6)}}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh;flex-direction:column;position:relative;z-index:1}
+.screen.active{display:flex}
+
+/* ─── LANDING ─── */
+#s-land{align-items:center;justify-content:center;padding:2.5rem 1.8rem;text-align:center}
+.land-badge{display:inline-flex;align-items:center;gap:7px;background:var(--gold-dim);border:0.5px solid var(--gold-border);color:var(--gold);font-size:10.5px;font-weight:600;letter-spacing:.1em;padding:6px 16px;border-radius:20px;text-transform:uppercase;margin-bottom:1.6rem;animation:fadeUp .6s ease both}
+.land-h1{font-family:'Playfair Display',serif;font-size:38px;font-weight:900;line-height:1.1;margin-bottom:1rem;animation:fadeUp .6s .08s ease both}
+.land-h1 em{color:var(--gold);font-style:normal}
+.land-line{width:50px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 1rem;animation:fadeUp .6s .12s ease both}
+.land-sub{color:var(--sub);font-size:15px;line-height:1.65;max-width:300px;margin:0 auto 2.2rem;animation:fadeUp .6s .16s ease both}
+.land-cta{background:var(--gold);color:#0A0A0A;font-size:15px;font-weight:700;padding:16px 32px;border-radius:12px;border:none;cursor:pointer;width:100%;max-width:320px;letter-spacing:.02em;animation:fadeUp .6s .22s ease both, glowPulse 2.8s 1s ease infinite;transition:transform .15s,filter .15s}
+.land-cta:hover{filter:brightness(1.08)}
+.land-cta:active{transform:scale(0.97)}
+.land-note{color:var(--sub2);font-size:12px;margin-top:.9rem;animation:fadeUp .6s .28s ease both}
+.land-stats{display:flex;gap:1.5rem;margin-top:2rem;animation:fadeUp .6s .32s ease both}
+.stat{text-align:center}
+.stat-num{font-size:20px;font-weight:700;color:var(--gold)}
+.stat-lbl{font-size:11px;color:var(--sub);letter-spacing:.04em}
+
+/* ─── QUESTIONS ─── */
+#s-q{padding:0}
+.q-header{padding:1.4rem 1.6rem 1rem;border-bottom:0.5px solid rgba(255,255,255,0.06)}
+.q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem}
+.q-num{color:var(--blue);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.q-pct{color:var(--sub);font-size:11px}
+.q-prog{height:3px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden}
+.q-prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));border-radius:2px;transition:width .55s cubic-bezier(.4,0,.2,1)}
+.q-body{padding:1.8rem 1.6rem 1rem;flex:1;display:flex;flex-direction:column}
+.q-text{font-family:'Playfair Display',serif;font-size:25px;font-weight:800;line-height:1.28;margin-bottom:1.8rem}
+.opts{display:flex;flex-direction:column;gap:.7rem}
+.opt{background:var(--glass);border:0.5px solid rgba(255,255,255,0.08);border-left:3px solid transparent;border-radius:12px;padding:1rem 1.1rem;cursor:pointer;font-size:14px;color:rgba(255,255,255,0.8);line-height:1.5;transition:all .2s cubic-bezier(.4,0,.2,1);text-align:left;position:relative;font-family:'DM Sans',sans-serif}
+.opt:hover{border-left-color:var(--gold);background:rgba(201,168,76,0.07);color:var(--white);transform:translateX(3px)}
+.opt.sel{border-left-color:var(--gold);background:rgba(201,168,76,0.11);color:var(--white)}
+.opt.sel::after{content:"✓";position:absolute;right:1rem;top:50%;transform:translateY(-50%);color:var(--gold);font-weight:700;font-size:15px}
+
+/* ─── ANALYZING ─── */
+#s-analyze{align-items:center;justify-content:center;padding:2rem;text-align:center;gap:1.6rem}
+.an-bar-wrap{width:100%;height:3px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;position:absolute;top:0;left:0}
+.an-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));border-radius:2px;width:0;transition:width .08s linear}
+.spinner-ring{width:58px;height:58px;border:2.5px solid rgba(74,158,255,0.15);border-top-color:var(--blue);border-right-color:var(--gold);border-radius:50%;animation:spin 1.1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.an-h{font-family:'Playfair Display',serif;font-size:23px;font-weight:800}
+.an-msg{color:var(--blue);font-size:13px;font-weight:500;min-height:22px;transition:opacity .35s ease}
+.an-sub{color:var(--sub);font-size:13px;max-width:240px;line-height:1.5}
+
+/* ─── RESULT ─── */
+#s-result{padding:0}
+.r-scroll{flex:1;overflow-y:auto;padding:1.6rem 1.5rem 3rem;display:flex;flex-direction:column;gap:1.1rem}
+.r-scroll::-webkit-scrollbar{width:3px}
+.r-scroll::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.2);border-radius:2px}
+.r-badge{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.09em;padding:5px 14px;border-radius:20px;text-transform:uppercase;width:fit-content}
+.r-h{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;line-height:1.2}
+.score-block{background:var(--surface);border:0.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.3rem}
+.score-big{font-size:54px;font-weight:800;line-height:1;font-family:'Playfair Display',serif}
+.score-denom{font-size:20px;color:var(--sub);font-weight:400}
+.score-bar{height:7px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden;margin:.9rem 0 .5rem}
+.score-bar-fill{height:100%;border-radius:4px;width:0;transition:width 1.3s .4s cubic-bezier(.4,0,.2,1)}
+.score-lbl{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.brutal{border-radius:12px;padding:1.2rem;border-left:3px solid}
+.brutal-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem}
+.brutal-txt{font-size:13.5px;color:rgba(255,255,255,0.78);line-height:1.6}
+.info-card{background:var(--glass);border:0.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.1rem}
+.info-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem;color:var(--sub)}
+.info-title{font-size:15px;font-weight:600}
+.breakdown{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.bd-col{background:var(--glass);border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:.9rem}
+.bd-lbl{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:.6rem}
+.bd-item{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:rgba(255,255,255,0.72);line-height:1.45;margin-bottom:.45rem}
+.bd-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px}
+
+/* ─── THE FIX (GREEN CARD) ─── */
+.fix-card{border:1.5px solid var(--green-border);border-radius:16px;padding:1.4rem;background:rgba(34,197,94,0.05)}
+.fix-top-badge{display:inline-flex;align-items:center;gap:5px;background:var(--green-dim);border:0.5px solid var(--green-border);color:var(--green);font-size:10px;font-weight:700;letter-spacing:.1em;padding:4px 12px;border-radius:20px;text-transform:uppercase;margin-bottom:.9rem}
+.fix-headline{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;margin-bottom:.5rem;line-height:1.2}
+.fix-intro{font-size:13px;color:rgba(255,255,255,0.68);line-height:1.6;margin-bottom:1.1rem}
+.fix-divider{height:0.5px;background:rgba(255,255,255,0.08);margin:.9rem 0}
+.fix-book{display:flex;align-items:flex-start;gap:.8rem;margin-bottom:.85rem}
+.fix-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.fix-book-name{font-size:14px;font-weight:700;color:var(--white);margin-bottom:2px}
+.fix-book-desc{font-size:12px;color:var(--sub);line-height:1.45}
+.fix-bullets{margin:.9rem 0 1.1rem}
+.fix-bullet{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:rgba(255,255,255,0.78);line-height:1.5;margin-bottom:.5rem}
+.fix-bullet::before{content:"→";color:var(--green);font-weight:700;flex-shrink:0;font-size:13px}
+.fix-note{font-size:12px;color:var(--sub);line-height:1.5;margin-bottom:1rem;font-style:italic}
+.buy-btn{display:block;width:100%;background:var(--green);color:#fff;font-size:15px;font-weight:700;padding:16px;border-radius:12px;border:none;cursor:pointer;letter-spacing:.03em;transition:all .2s;text-align:center;text-decoration:none;animation:glowGreen 2.8s ease infinite}
+.buy-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.buy-btn:active{transform:scale(0.97)}
+@keyframes glowGreen{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.2)}50%{box-shadow:0 0 20px 4px rgba(34,197,94,0.25)}}
+.buy-meta{text-align:center;font-size:12px;color:var(--sub2);margin-top:.6rem}
+.retake{display:block;width:100%;background:transparent;border:0.5px solid rgba(255,255,255,0.1);color:var(--sub);font-size:13px;padding:12px;border-radius:10px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;text-align:center;margin-top:.4rem}
+.retake:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 var(--gold-glow)}50%{box-shadow:0 0 22px 5px var(--gold-glow)}}
+.anim{opacity:0;animation:fadeUp .45s ease forwards}
+</style>
+</head>
+<body>
+<div id="particles"></div>
+<div id="app">
+
+<!-- LANDING -->
+<div class="screen active" id="s-land">
+  <div class="land-badge">&#129504; Free Psychology Diagnosis</div>
+  <h1 class="land-h1">Find What's <em>Killing</em><br>Your Sales</h1>
+  <div class="land-line"></div>
+  <p class="land-sub">8 psychology questions. 3 minutes.<br>Your exact sales blocker — found instantly.</p>
+  <button class="land-cta" onclick="startDiag()">Start The Diagnosis &nbsp;&#8594;</button>
+  <p class="land-note">Free &nbsp;·&nbsp; No email required &nbsp;·&nbsp; Instant result</p>
+  <div class="land-stats">
+    <div class="stat"><div class="stat-num">8</div><div class="stat-lbl">Questions</div></div>
+    <div class="stat"><div class="stat-num">3<span style="font-size:13px">min</span></div><div class="stat-lbl">To complete</div></div>
+    <div class="stat"><div class="stat-num">4</div><div class="stat-lbl">Outcomes</div></div>
+  </div>
+</div>
+
+<!-- QUESTIONS -->
+<div class="screen" id="s-q">
+  <div class="q-header">
+    <div class="q-meta">
+      <div class="q-num" id="q-num">QUESTION 1 / 8</div>
+      <div class="q-pct" id="q-pct">0%</div>
+    </div>
+    <div class="q-prog"><div class="q-prog-fill" id="q-prog" style="width:0%"></div></div>
+  </div>
+  <div class="q-body">
+    <div class="q-text" id="q-text"></div>
+    <div class="opts" id="opts"></div>
+  </div>
+</div>
+
+<!-- ANALYZING -->
+<div class="screen" id="s-analyze">
+  <div class="an-bar-wrap"><div class="an-bar-fill" id="an-fill"></div></div>
+  <div class="spinner-ring"></div>
+  <div class="an-h">Analyzing your responses...</div>
+  <div class="an-msg" id="an-msg">Mapping your psychology profile...</div>
+  <div class="an-sub">Your personal sales blocker is being identified right now</div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="s-result">
+  <div class="r-scroll" id="r-content"></div>
+</div>
+
+<script>
+const Qs=[
+  {q:"When was the last time someone bought from you?",opts:["I've made zero sales so far","Random sales — then silence for days","I get sales but can't make them consistent","I close regularly — just want to scale"]},
+  {q:"When someone sees your offer — what do they feel first?",opts:["Nothing. They just read the information","Mild interest but nothing urgent","They feel something but don't always act","An immediate pull — they want it"]},
+  {q:"How does your content end?",opts:["It just ends. No real direction","I sometimes mention my product","I have a CTA but it rarely converts","Every post leads somewhere with clear intent"]},
+  {q:"When a prospect says 'I'll think about it' — what happens?",opts:["I say okay and never hear from them again","I follow up once then give up","I try to handle it but don't always close","I know exactly what to say — and close"]},
+  {q:"How fast do strangers trust you?",opts:["I don't think they do","Some do but most seem unsure","People engage but hesitate to buy","People DM me ready to buy — no convincing needed"]},
+  {q:"How do you open a DM conversation?",opts:["I lead with my offer or product","I compliment them then pitch","I ask about their situation first","I lead with their problem and close naturally"]},
+  {q:"What does your offer or bio feel like right now?",opts:["A list of what's included","A description of the product","A mix of features and benefits","A psychological journey — buying feels obvious"]},
+  {q:"Be honest — why aren't buyers saying yes?",opts:["I genuinely have no idea","My content isn't connecting emotionally","People are interested — something blocks the close","I'm close — just need to sharpen the system"]}
+];
+
+const RES=[
+  {min:8,max:14,badge:"Dead Sale Zone",bc:"var(--red)",bbg:"var(--red-dim)",h:"Your Sales Are Flatlining",brutal:"Buyers are reaching you and feeling nothing. No emotional trigger. No trust. No urgency. The psychology gaps are everywhere — and they're costing you every sale silently.",blocker:"Emotional Disconnect",risk:"Trust Signals Missing",why:["No emotion-first messaging anywhere","Zero closing structure in content or DMs","Buyers feel informed — not compelled to act"],ignore:["Every post becomes another dead sale","Competitors close the buyers you warmed up","Zero sales compounds into burnout"]},
+  {min:15,max:20,badge:"Leak Zone",bc:"var(--orange)",bbg:"var(--orange-dim)",h:"You're Losing Sales You Should Be Closing",brutal:"You're getting attention but something invisible is breaking the close. The psychology is almost there — but almost doesn't pay. One or two targeted fixes could change everything.",blocker:"Conversion Gap",risk:"Objection Handling",why:["Content engages but doesn't direct to action","Trust exists — urgency is completely missing","DMs go cold before the close happens"],ignore:["Warm leads keep disappearing silently","Random sales stay random forever","The gap between you and consistency grows daily"]},
+  {min:21,max:26,badge:"Fixing Stage",bc:"var(--yellow)",bbg:"var(--yellow-dim)",h:"Close — But Not Consistent",brutal:"You understand buyer psychology — but gaps in your closing structure and urgency are costing you buyers who were already ready to say yes. You're so close it's actually painful.",blocker:"Closing Structure",risk:"Urgency Engineering",why:["Strong content — weak close every single time","Trust built — momentum lost at decision point","DMs almost there — just not crossing the line"],ignore:["Inconsistency becomes your brand identity","Buyers who were ready choose the cleaner closer","Plateau becomes permanent without this fix"]},
+  {min:27,max:32,badge:"Optimising Stage",bc:"var(--green)",bbg:"var(--green-dim)",h:"Strong Foundation — Now Scale It",brutal:"You're ahead of 90% of sellers. The gap now is precision — sharper psychological triggers, identity-based selling, and advanced patterns that compound your existing strengths.",blocker:"Advanced Trigger Precision",risk:"Scale System",why:["Strong psychology foundation already in place","Good conversion instincts — needs refinement","Ready to move from closing to consistent scaling"],ignore:["Good becomes the ceiling without sharpening","Competitors who refine will outclose you at scale","Plateau is just around the corner without this"]}
+];
+
+let cur=0,scores=[],total=0;
+
+// particles
+(function(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<22;i++){
+    const d=document.createElement('div');
+    d.className='p';
+    const s=Math.random()*3+1.5;
+    d.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${100+Math.random()*20}%;background:${Math.random()>.5?'#C9A84C':'#4A9EFF'};opacity:${Math.random()*.35+.1};animation-duration:${Math.random()*14+9}s;animation-delay:${Math.random()*8}s`;
+    c.appendChild(d);
+  }
+})();
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+
+function startDiag(){cur=0;scores=[];renderQ();show('s-q');}
+
+function renderQ(){
+  const q=Qs[cur];
+  const pct=Math.round((cur/Qs.length)*100);
+  document.getElementById('q-num').textContent=`QUESTION ${cur+1} / ${Qs.length}`;
+  document.getElementById('q-pct').textContent=pct+'%';
+  document.getElementById('q-prog').style.width=pct+'%';
+  const qt=document.getElementById('q-text');
+  qt.style.animation='none';qt.offsetHeight;qt.style.cssText='animation:fadeUp .38s ease both';
+  qt.textContent=q.q;
+  const oc=document.getElementById('opts');
+  oc.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.textContent=o;
+    b.style.cssText=`opacity:0;animation:fadeUp .38s ${i*0.08}s ease forwards`;
+    b.onclick=()=>pick(b,i+1);
+    oc.appendChild(b);
+  });
+}
+
+function pick(el,score){
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  scores.push(score);
+  setTimeout(()=>{cur++;if(cur<Qs.length)renderQ();else analyze();},460);
+}
+
+function analyze(){
+  show('s-analyze');
+  total=scores.reduce((a,b)=>a+b,0);
+  const fill=document.getElementById('an-fill');
+  const msg=document.getElementById('an-msg');
+  const msgs=["Mapping your psychology profile...","Identifying your primary sales blocker...","Calculating your buyer trust score...","Building your diagnosis...","Your result is ready."];
+  let p=0,mi=0;
+  const iv=setInterval(()=>{
+    p+=1.8;fill.style.width=Math.min(p,100)+'%';
+    const idx=p<22?0:p<44?1:p<64?2:p<84?3:4;
+    if(idx!==mi){mi=idx;msg.style.opacity='0';setTimeout(()=>{msg.textContent=msgs[mi];msg.style.opacity='1';},180);}
+    if(p>=100){clearInterval(iv);setTimeout(buildResult,700);}
+  },40);
+}
+
+function buildResult(){
+  const r=RES.find(x=>total>=x.min&&total<=x.max)||RES[0];
+  const pct=Math.round(((total-8)/24)*100);
+  const rc=document.getElementById('r-content');
+
+  rc.innerHTML=`
+    <div class="r-badge anim" style="background:${r.bbg};color:${r.bc};border:0.5px solid ${r.bc};animation-delay:.0s">${r.badge}</div>
+    <h2 class="r-h anim" style="animation-delay:.05s">${r.h}</h2>
+
+    <div class="score-block anim" style="animation-delay:.1s">
+      <div style="display:flex;align-items:baseline;gap:7px;margin-bottom:.8rem">
+        <span class="score-big" style="color:${r.bc}">${total}</span>
+        <span class="score-denom">/ 32</span>
+      </div>
+      <div class="score-bar"><div class="score-bar-fill" id="sbar" style="background:${r.bc}"></div></div>
+      <div class="score-lbl" style="color:${r.bc}">${r.badge}</div>
+    </div>
+
+    <div class="brutal anim" style="animation-delay:.15s;background:${r.bbg};border-left-color:${r.bc}">
+      <div class="brutal-lbl" style="color:${r.bc}">⚠ Brutal Truth</div>
+      <div class="brutal-txt">${r.brutal}</div>
+    </div>
+
+    <div class="info-card anim" style="animation-delay:.2s">
+      <div class="info-lbl" style="color:var(--blue)">Primary Sales Blocker</div>
+      <div class="info-title">${r.blocker}</div>
+    </div>
+
+    <div class="info-card anim" style="animation-delay:.23s;opacity:.8">
+      <div class="info-lbl">Secondary Risk</div>
+      <div class="info-title" style="font-size:14px;color:rgba(255,255,255,0.65)">${r.risk}</div>
+    </div>
+
+    <div class="anim" style="animation-delay:.26s">
+      <div style="font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--sub);margin-bottom:.75rem">Your Sales Breakdown</div>
+      <div class="breakdown">
+        <div class="bd-col">
+          <div class="bd-lbl" style="color:var(--sub)">Why you got this</div>
+          ${r.why.map(w=>`<div class="bd-item"><div class="bd-dot" style="background:${r.bc}"></div><span>${w}</span></div>`).join('')}
+        </div>
+        <div class="bd-col">
+          <div class="bd-lbl" style="color:var(--red)">If you ignore this</div>
+          ${r.ignore.map(i=>`<div class="bd-item"><div class="bd-dot" style="background:var(--red)"></div><span>${i}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="fix-card anim" style="animation-delay:.32s">
+      <div class="fix-top-badge">&#10003; The Fix</div>
+      <div class="fix-headline">Make Them Beg to Buy<br>+ 7 Days. 10 Buyers. No Ads.</div>
+      <div class="fix-intro">The exact system that seals the gaps this diagnosis just found — and turns them into closed sales. Starting from today.</div>
+      <div class="fix-divider"></div>
+      <div class="fix-book">
+        <div class="fix-icon">&#128218;</div>
+        <div>
+          <div class="fix-book-name">Make Them Beg to Buy</div>
+          <div class="fix-book-desc">The complete buyer psychology system — 50+ tactics, 6 frameworks built around exactly what's blocking your sales</div>
+        </div>
+      </div>
+      <div class="fix-book">
+        <div class="fix-icon">&#128197;</div>
+        <div>
+          <div class="fix-book-name">7 Days. 10 Buyers. No Ads.</div>
+          <div class="fix-book-desc">The daily execution plan — one action per day, real closes in 7 days, zero ad spend</div>
+        </div>
+      </div>
+      <div class="fix-bullets">
+        <div class="fix-bullet">Wire your messaging to trigger emotion before logic</div>
+        <div class="fix-bullet">Build trust with strangers in under 30 seconds</div>
+        <div class="fix-bullet">Close in DMs without ever feeling salesy</div>
+        <div class="fix-bullet">Turn every piece of content into a conversion event</div>
+      </div>
+      <div class="fix-note">No guesswork. No random posting. Just a psychology-driven system that makes buyers feel like they can't say no.</div>
+      <a class="buy-btn" href="https://closersofficial.gumroad.com/l/Make-Them-Beg-To-Buy?layout=profile"target="_blank">GET BOTH NOW — MAKE THEM BEG TO BUY &nbsp;&#8594;</a>
+      <div class="buy-meta">One time &nbsp;·&nbsp; Instant access &nbsp;·&nbsp; Start today</div>
+    </div>
+
+    <button class="retake" onclick="retake()">&#8592; Retake Diagnosis</button>
+    <div style="height:2rem"></div>
+  `;
+
+  show('s-result');
+  setTimeout(()=>{
+    const sb=document.getElementById('sbar');
+    if(sb)sb.style.width=pct+'%';
+  },300);
+}
+
+function retake(){cur=0;scores=[];total=0;show('s-land');}
+</script>
+</body>
+</html>
